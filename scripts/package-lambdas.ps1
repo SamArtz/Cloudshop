@@ -46,6 +46,28 @@ if (Test-Path $AuthZip) { Remove-Item $AuthZip -Force }
 Compress-Archive -Path (Join-Path $AuthBuild "*") -DestinationPath $AuthZip -Force
 Write-Host "OK: $AuthZip"
 
+# ---------- Catalog Service ----------
+$CatalogBuild = Join-Path $Build "catalog_service"
+New-Item -ItemType Directory -Force -Path $CatalogBuild | Out-Null
+
+$CatalogReq = Join-Path $CatalogBuild "requirements.pkg.txt"
+@"
+boto3>=1.34.0
+"@ | Set-Content $CatalogReq -Encoding utf8
+
+Write-Host "==> Instalando deps Catalog Service (manylinux)..."
+Install-Deps -ReqFile $CatalogReq -TargetDir $CatalogBuild
+
+Copy-Item (Join-Path $Root "src\catalog_service\handler.py")      $CatalogBuild -Force
+Copy-Item (Join-Path $Root "src\catalog_service\permissions.py")  $CatalogBuild -Force
+Copy-Item (Join-Path $Root "src\catalog_service\repository.py")   $CatalogBuild -Force
+Copy-Item -Recurse (Join-Path $Root "src\shared") (Join-Path $CatalogBuild "shared") -Force
+
+$CatalogZip = Join-Path $Out "catalog_service.zip"
+if (Test-Path $CatalogZip) { Remove-Item $CatalogZip -Force }
+Compress-Archive -Path (Join-Path $CatalogBuild "*") -DestinationPath $CatalogZip -Force
+Write-Host "OK: $CatalogZip"
+
 # ---------- Authorizer ----------
 $AuthzBuild = Join-Path $Build "authorizer"
 New-Item -ItemType Directory -Force -Path $AuthzBuild | Out-Null
