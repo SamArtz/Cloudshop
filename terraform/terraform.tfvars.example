@@ -1,0 +1,21 @@
+# Copia este archivo como terraform.tfvars y completa con los valores reales
+# de tu cuenta AWS y del stack compartido (auth / catalog).
+
+aws_region = "us-east-1"
+project    = "cloudshop"
+stage_name = "dev"
+
+# --- Recursos compartidos (salidas del stack de auth/catalog) ---
+rest_api_id               = "abcd1234ef"
+rest_api_root_resource_id = "xyz0987654"
+rest_api_execution_arn    = "arn:aws:execute-api:us-east-1:123456789012:abcd1234ef"
+authorizer_id             = "auth123"
+
+products_table_name = "cloudshop-dev-products"
+products_table_arn  = "arn:aws:dynamodb:us-east-1:123456789012:table/cloudshop-dev-products"
+audit_table_name    = "cloudshop-dev-audit-logs"
+audit_table_arn     = "arn:aws:dynamodb:us-east-1:123456789012:table/cloudshop-dev-audit-logs"
+
+# --- SES ---
+ses_sender_email  = "no-reply@tudominio.com"
+ses_verify_sender = true

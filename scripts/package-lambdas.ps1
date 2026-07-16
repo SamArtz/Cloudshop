@@ -87,6 +87,47 @@ if (Test-Path $AuthzZip) { Remove-Item $AuthzZip -Force }
 Compress-Archive -Path (Join-Path $AuthzBuild "*") -DestinationPath $AuthzZip -Force
 Write-Host "OK: $AuthzZip"
 
+# ---------- Order Service (Carrito & Pedidos) ----------
+$OrderBuild = Join-Path $Build "order_service"
+New-Item -ItemType Directory -Force -Path $OrderBuild | Out-Null
+
+$OrderReq = Join-Path $OrderBuild "requirements.pkg.txt"
+@"
+boto3>=1.34.0
+"@ | Set-Content $OrderReq -Encoding utf8
+
+Write-Host "==> Instalando deps Order Service (manylinux)..."
+Install-Deps -ReqFile $OrderReq -TargetDir $OrderBuild
+
+Copy-Item (Join-Path $Root "src\order_service\handler.py")      $OrderBuild -Force
+Copy-Item (Join-Path $Root "src\order_service\repository.py")   $OrderBuild -Force
+Copy-Item (Join-Path $Root "src\order_service\permissions.py")  $OrderBuild -Force
+Copy-Item -Recurse (Join-Path $Root "src\shared") (Join-Path $OrderBuild "shared") -Force
+
+$OrderZip = Join-Path $Out "order_service.zip"
+if (Test-Path $OrderZip) { Remove-Item $OrderZip -Force }
+Compress-Archive -Path (Join-Path $OrderBuild "*") -DestinationPath $OrderZip -Force
+Write-Host "OK: $OrderZip"
+
+# ---------- Notifications (EventBridge -> SES) ----------
+$NotifBuild = Join-Path $Build "notifications"
+New-Item -ItemType Directory -Force -Path $NotifBuild | Out-Null
+
+$NotifReq = Join-Path $NotifBuild "requirements.pkg.txt"
+@"
+boto3>=1.34.0
+"@ | Set-Content $NotifReq -Encoding utf8
+
+Write-Host "==> Instalando deps Notifications (manylinux)..."
+Install-Deps -ReqFile $NotifReq -TargetDir $NotifBuild
+
+Copy-Item (Join-Path $Root "src\notifications\handler.py") $NotifBuild -Force
+
+$NotifZip = Join-Path $Out "notifications.zip"
+if (Test-Path $NotifZip) { Remove-Item $NotifZip -Force }
+Compress-Archive -Path (Join-Path $NotifBuild "*") -DestinationPath $NotifZip -Force
+Write-Host "OK: $NotifZip"
+
 Write-Host ""
 Write-Host "Listo. Zips en: $Out"
 Get-ChildItem $Out
