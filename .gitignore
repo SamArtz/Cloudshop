@@ -10,6 +10,7 @@ crash.log
 build/
 dist/
 *.zip
+terraform/.build/
 
 __pycache__/
 *.py[cod]
