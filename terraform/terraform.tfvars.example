@@ -19,3 +19,15 @@ audit_table_arn     = "arn:aws:dynamodb:us-east-1:123456789012:table/cloudshop-d
 # --- SES ---
 ses_sender_email  = "no-reply@tudominio.com"
 ses_verify_sender = true
+
+# --- Report Service / CloudWatch ---
+stores_table_name = "cloudshop-dev-stores"
+stores_table_arn  = "arn:aws:dynamodb:us-east-1:123456789012:table/cloudshop-dev-stores"
+api_gateway_name  = "cloudshop-api"
+
+# Coloca el log group real para contar errores del authorizer; déjalo vacío si
+# todavía no está disponible.
+authorizer_log_group_name = "/aws/lambda/cloudshop-dev-authorizer"
+
+report_latency_alarm_ms           = 3000
+enable_api_gateway_method_metrics = true

@@ -17,3 +17,9 @@ Módulo de autenticación y gestión de usuarios para CloudShop Enterprise (AWS 
 - Auth: JWT (PyJWT) + bcrypt
 
 ## Estructura
+## Módulo 6 — Dashboard & Monitoreo
+
+- `src/report_service`: Lambda Python del dashboard ejecutivo.
+- `terraform/reports.tf`: API, IAM, CloudWatch dashboard, alarmas y métricas.
+- `docs/MODULO-DASHBOARD-MONITOREO.md`: documentación y Caso de prueba 3.
+- Endpoint: `GET /reports/dashboard` (solo rol `ADMIN`).
