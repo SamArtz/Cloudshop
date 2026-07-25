@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CloudShop Enterprise</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #1e293b;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(ellipse at top, #1e3a5f 0%, transparent 55%),
+        linear-gradient(160deg, #0f172a, #020617 70%);
+      display: grid;
+      place-items: center;
+      padding: 2rem;
+    }
+    main {
+      width: min(640px, 100%);
+      background: color-mix(in srgb, var(--panel) 88%, transparent);
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 20px 50px rgba(0,0,0,.35);
+    }
+    h1 {
+      margin: 0 0 .5rem;
+      font-size: clamp(1.8rem, 4vw, 2.4rem);
+      letter-spacing: -0.02em;
+    }
+    .brand { color: var(--accent); font-weight: 700; }
+    p { color: var(--muted); line-height: 1.55; }
+    code {
+      display: block;
+      margin-top: 1.25rem;
+      padding: 0.85rem 1rem;
+      background: #020617;
+      border-radius: 10px;
+      color: #7dd3fc;
+      font-size: 0.9rem;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1><span class="brand">CloudShop</span> Enterprise</h1>
+    <p>
+      Frontend estático servido desde S3 a través de CloudFront, protegido con AWS WAF.
+      El backend vive en API Gateway + Lambda + DynamoDB + EventBridge + SES.
+    </p>
+    <p>Configura la URL del API en tu cliente o sustituye este placeholder por el frontend del equipo.</p>
+    <code>GET /auth/login · /products · /cart · /orders</code>
+  </main>
+</body>
+</html>

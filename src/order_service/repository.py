@@ -93,17 +93,25 @@ def write_audit(user_id, action, resource_id, result, details=None):
 # ---------------------------------------------------------------------------
 # EventBridge (PDF sección 6 - arquitectura basada en eventos)
 # ---------------------------------------------------------------------------
-def publish_order_created(order: dict) -> None:
+def _publish_order_event(detail_type: str, order: dict) -> None:
     _events.put_events(
         Entries=[
             {
                 "Source": "cloudshop.orders",
-                "DetailType": "OrderCreated",
+                "DetailType": detail_type,
                 "Detail": json.dumps(_floats(order), default=str),
                 "EventBusName": EVENT_BUS_NAME,
             }
         ]
     )
+
+
+def publish_order_created(order: dict) -> None:
+    _publish_order_event("OrderCreated", order)
+
+
+def publish_order_cancelled(order: dict) -> None:
+    _publish_order_event("OrderCancelled", order)
 
 
 # ---------------------------------------------------------------------------
@@ -393,4 +401,6 @@ def cancel_order(order_id: str) -> dict:
     order["status"] = STATUS_CANCELLED
     order["statusHistory"] = history
     order["updatedAt"] = now
-    return _floats(order)
+    result = _floats(order)
+    publish_order_cancelled(result)
+    return result
