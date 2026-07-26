@@ -23,7 +23,8 @@ resource "null_resource" "stage_report_service" {
   }
 
   provisioner "local-exec" {
-    command = "python \"${local.stage_script}\" report_service"
+    working_dir = local.stage_working_dir
+    command     = "python scripts/stage_lambda.py report_service"
   }
 }
 

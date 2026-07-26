@@ -25,5 +25,8 @@ locals {
   }
 
   # Empaquetado de Lambdas (scripts/stage_lambda.py → terraform/.build/)
-  stage_script = abspath("${path.module}/../scripts/stage_lambda.py")
+  # Ruta solo para filemd5; el local-exec usa working_dir + comando relativo
+  # para evitar fallos en Windows cuando el path tiene espacios (ej. "proyecto final").
+  stage_script     = "${path.module}/../scripts/stage_lambda.py"
+  stage_working_dir = "${path.module}/.."
 }

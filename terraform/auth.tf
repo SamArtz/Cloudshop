@@ -41,7 +41,8 @@ resource "null_resource" "stage_auth_service" {
   }
 
   provisioner "local-exec" {
-    command = "python \"${local.stage_script}\" auth_service"
+    working_dir = local.stage_working_dir
+    command     = "python scripts/stage_lambda.py auth_service"
   }
 }
 
@@ -52,7 +53,8 @@ resource "null_resource" "stage_authorizer" {
   }
 
   provisioner "local-exec" {
-    command = "python \"${local.stage_script}\" authorizer"
+    working_dir = local.stage_working_dir
+    command     = "python scripts/stage_lambda.py authorizer"
   }
 }
 

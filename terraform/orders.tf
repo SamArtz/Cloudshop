@@ -19,7 +19,8 @@ resource "null_resource" "stage_order_service" {
   }
 
   provisioner "local-exec" {
-    command = "python \"${local.stage_script}\" order_service"
+    working_dir = local.stage_working_dir
+    command     = "python scripts/stage_lambda.py order_service"
   }
 }
 
@@ -30,7 +31,8 @@ resource "null_resource" "stage_notifications" {
   }
 
   provisioner "local-exec" {
-    command = "python \"${local.stage_script}\" notifications"
+    working_dir = local.stage_working_dir
+    command     = "python scripts/stage_lambda.py notifications"
   }
 }
 

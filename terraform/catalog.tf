@@ -17,7 +17,8 @@ resource "null_resource" "stage_catalog_service" {
   }
 
   provisioner "local-exec" {
-    command = "python \"${local.stage_script}\" catalog_service"
+    working_dir = local.stage_working_dir
+    command     = "python scripts/stage_lambda.py catalog_service"
   }
 }
 
