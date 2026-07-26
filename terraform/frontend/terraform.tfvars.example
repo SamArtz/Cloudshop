@@ -1,0 +1,9 @@
+aws_region  = "us-east-1"
+project     = "cloudshop"
+stage_name  = "dev"
+
+# Sube automáticamente los archivos de /frontend al bucket
+upload_frontend = true
+
+# Límite de requests por IP cada 5 minutos (WAF)
+waf_rate_limit = 2000
