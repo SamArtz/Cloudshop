@@ -1,66 +1,183 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CloudShop Enterprise</title>
-  <style>
-    :root {
-      --bg: #0f172a;
-      --panel: #1e293b;
-      --text: #e2e8f0;
-      --muted: #94a3b8;
-      --accent: #38bdf8;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: "Segoe UI", system-ui, sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(ellipse at top, #1e3a5f 0%, transparent 55%),
-        linear-gradient(160deg, #0f172a, #020617 70%);
-      display: grid;
-      place-items: center;
-      padding: 2rem;
-    }
-    main {
-      width: min(640px, 100%);
-      background: color-mix(in srgb, var(--panel) 88%, transparent);
-      border: 1px solid #334155;
-      border-radius: 16px;
-      padding: 2rem;
-      box-shadow: 0 20px 50px rgba(0,0,0,.35);
-    }
-    h1 {
-      margin: 0 0 .5rem;
-      font-size: clamp(1.8rem, 4vw, 2.4rem);
-      letter-spacing: -0.02em;
-    }
-    .brand { color: var(--accent); font-weight: 700; }
-    p { color: var(--muted); line-height: 1.55; }
-    code {
-      display: block;
-      margin-top: 1.25rem;
-      padding: 0.85rem 1rem;
-      background: #020617;
-      border-radius: 10px;
-      color: #7dd3fc;
-      font-size: 0.9rem;
-      overflow-x: auto;
-    }
-  </style>
-</head>
-<body>
-  <main>
-    <h1><span class="brand">CloudShop</span> Enterprise</h1>
-    <p>
-      Frontend estático servido desde S3 a través de CloudFront, protegido con AWS WAF.
-      El backend vive en API Gateway + Lambda + DynamoDB + EventBridge + SES.
-    </p>
-    <p>Configura la URL del API en tu cliente o sustituye este placeholder por el frontend del equipo.</p>
-    <code>GET /auth/login · /products · /cart · /orders</code>
-  </main>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CloudShop Enterprise</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:opsz,wght@9..144,500;9..144,650&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/styles.css" />
+  </head>
+  <body>
+    <!-- ========== AUTH ========== -->
+    <main id="view-auth" class="shell hero-auth">
+      <section class="hero-copy">
+        <div class="brand">Cloud<span>Shop</span></div>
+        <h1>Comercio en la nube, listo para operar.</h1>
+        <p>
+          Frontend de entrada para CloudShop Enterprise. Conéctalo al API Gateway
+        </p>
+      </section>
+
+      <section class="panel">
+        <h2>Acceso</h2>
+        <p class="hint">Usa las credenciales de prueba o crea un cliente nuevo.</p>
+
+        <div id="alert-auth" class="alert hidden"></div>
+
+        <div class="field">
+          <label for="api-url">URL del API (API Gateway)</label>
+          <input
+            id="api-url"
+            type="url"
+            placeholder="https://xxxx.execute-api.us-east-1.amazonaws.com/dev"
+          />
+        </div>
+
+        <div class="tabs">
+          <button type="button" id="tab-login" class="active">Iniciar sesión</button>
+          <button type="button" id="tab-register">Registrarse</button>
+        </div>
+
+        <form id="form-login">
+          <div class="field">
+            <label for="login-email">Email</label>
+            <input id="login-email" type="email" required value="cliente2@test.com" />
+          </div>
+          <div class="field">
+            <label for="login-password">Password</label>
+            <input id="login-password" type="password" required value="Password1" />
+          </div>
+          <button class="btn btn-primary" type="submit">Entrar</button>
+        </form>
+
+        <form id="form-register" class="hidden">
+          <div class="field">
+            <label for="reg-name">Nombre completo</label>
+            <input id="reg-name" type="text" required placeholder="Cliente Dos" />
+          </div>
+          <div class="field">
+            <label for="reg-email">Email</label>
+            <input id="reg-email" type="email" required placeholder="cliente2@test.com" />
+          </div>
+          <div class="field">
+            <label for="reg-password">Password (mín. 8)</label>
+            <input id="reg-password" type="password" required minlength="8" />
+          </div>
+          <button class="btn btn-primary" type="submit">Crear cuenta CLIENT</button>
+        </form>
+      </section>
+    </main>
+
+    <!-- ========== APP ========== -->
+    <div id="view-app" class="shell hidden">
+      <header class="topbar">
+        <div>
+          <div class="brand">Cloud<span>Shop</span></div>
+          <div id="user-chip" class="user-chip"></div>
+        </div>
+        <nav class="nav">
+          <button type="button" data-page="products" class="active">Productos</button>
+          <button type="button" data-page="cart">Carrito</button>
+          <button type="button" data-page="orders">Pedidos</button>
+          <button type="button" data-page="settings">Ajustes</button>
+          <button type="button" id="btn-logout">Salir</button>
+        </nav>
+      </header>
+
+      <div id="alert-app" class="alert hidden"></div>
+
+      <!-- Productos -->
+      <section data-view="products">
+        <div class="section-head">
+          <div>
+            <h2>Catálogo</h2>
+            <p>Productos disponibles desde el Catalog Service.</p>
+          </div>
+        </div>
+        <div id="products-grid" class="grid"></div>
+      </section>
+
+      <!-- Carrito -->
+      <section data-view="cart" class="hidden">
+        <div class="section-head">
+          <div>
+            <h2>Carrito</h2>
+            <p>Gestiona tus artículos antes de crear el pedido.</p>
+          </div>
+          <div class="row-actions">
+            <button type="button" class="btn btn-secondary" id="btn-clear-cart">Vaciar</button>
+            <button type="button" class="btn btn-warm" id="btn-checkout">Crear pedido</button>
+          </div>
+        </div>
+        <div class="panel">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="cart-body"></tbody>
+          </table>
+          <p style="margin: 1rem 0 0; font-family: var(--font-display); font-size: 1.4rem">
+            Total: <span id="cart-total">$0.00</span>
+          </p>
+        </div>
+      </section>
+
+      <!-- Pedidos -->
+      <section data-view="orders" class="hidden">
+        <div class="section-head">
+          <div>
+            <h2>Pedidos</h2>
+            <p>Historial de pedidos del Order Service.</p>
+          </div>
+        </div>
+        <div class="panel">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Estado</th>
+                <th>Total</th>
+                <th>Fecha</th>
+              </tr>
+            </thead>
+            <tbody id="orders-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Ajustes -->
+      <section data-view="settings" class="hidden">
+        <div class="section-head">
+          <div>
+            <h2>Ajustes</h2>
+            <p>Pega aquí la Invoke URL cuando tu equipo te la pase.</p>
+          </div>
+        </div>
+        <form id="form-settings" class="panel" style="max-width: 640px">
+          <div class="field">
+            <label for="api-url-settings">API Base URL</label>
+            <input
+              id="api-url-settings"
+              type="url"
+              placeholder="https://xxxx.execute-api.us-east-1.amazonaws.com/dev"
+              required
+            />
+          </div>
+          <button class="btn btn-primary" type="submit">Guardar URL</button>
+        </form>
+      </section>
+    </div>
+
+    <script type="module" src="./js/app.js"></script>
+  </body>
 </html>
