@@ -1,33 +1,21 @@
-# Copia este archivo como terraform.tfvars y completa con los valores reales
-# de tu cuenta AWS y del stack compartido (auth / catalog).
+# Copia este archivo como terraform.tfvars y ajusta los valores.
+# Caso de prueba 4: un solo `terraform apply` despliega todo el stack.
 
-aws_region = "us-east-1"
-project    = "cloudshop"
-stage_name = "dev"
+aws_region  = "us-east-1"
+project     = "cloudshop"
+stage_name  = "dev"
 
-# --- Recursos compartidos (salidas del stack de auth/catalog) ---
-rest_api_id               = "abcd1234ef"
-rest_api_root_resource_id = "xyz0987654"
-rest_api_execution_arn    = "arn:aws:execute-api:us-east-1:123456789012:abcd1234ef"
-authorizer_id             = "auth123"
-
-products_table_name = "cloudshop-dev-products"
-products_table_arn  = "arn:aws:dynamodb:us-east-1:123456789012:table/cloudshop-dev-products"
-audit_table_name    = "cloudshop-dev-audit-logs"
-audit_table_arn     = "arn:aws:dynamodb:us-east-1:123456789012:table/cloudshop-dev-audit-logs"
-
-# --- SES ---
-ses_sender_email  = "no-reply@tudominio.com"
+# Correo que usarás como remitente SES (recibirás un mail de verificación)
+ses_sender_email  = "tu-correo@ejemplo.com"
 ses_verify_sender = true
 
-# --- Report Service / CloudWatch ---
-stores_table_name = "cloudshop-dev-stores"
-stores_table_arn  = "arn:aws:dynamodb:us-east-1:123456789012:table/cloudshop-dev-stores"
-api_gateway_name  = "cloudshop-api"
+jwt_expiration_hours = 24
+log_retention_days   = 14
 
-# Coloca el log group real para contar errores del authorizer; déjalo vacío si
-# todavía no está disponible.
-authorizer_log_group_name = "/aws/lambda/cloudshop-dev-authorizer"
+upload_frontend      = true
+waf_rate_limit       = 2000
+enable_event_archive = true
 
+# --- Report Service / CloudWatch (Módulo 6 / Caso 3) ---
 report_latency_alarm_ms           = 3000
 enable_api_gateway_method_metrics = true

@@ -1,3 +1,8 @@
+# =============================================================================
+# Report Service + CloudWatch (Módulo 6 / Caso de prueba 3)
+# Integrado al stack unificado (API, DynamoDB y Authorizer locales).
+# =============================================================================
+
 locals {
   report_service_name       = "${local.name_prefix}-report-service"
   monitoring_dashboard_name = "${local.name_prefix}-monitoring"
@@ -14,16 +19,11 @@ resource "null_resource" "stage_report_service" {
     permissions = filemd5("${path.module}/../src/report_service/permissions.py")
     shared_err  = filemd5("${path.module}/../src/shared/errors.py")
     shared_resp = filemd5("${path.module}/../src/shared/response.py")
+    script      = filemd5(local.stage_script)
   }
 
   provisioner "local-exec" {
-    command = <<-EOT
-      set -e
-      DST="${path.module}/.build/report_service"
-      rm -rf "$DST" && mkdir -p "$DST"
-      cp ${path.module}/../src/report_service/*.py "$DST/"
-      cp -R ${path.module}/../src/shared "$DST/shared"
-    EOT
+    command = "python \"${local.stage_script}\" report_service"
   }
 }
 
@@ -60,13 +60,13 @@ data "aws_iam_policy_document" "report_service" {
   statement {
     sid       = "ReadProducts"
     actions   = ["dynamodb:Scan", "dynamodb:GetItem"]
-    resources = [var.products_table_arn]
+    resources = [aws_dynamodb_table.products.arn]
   }
 
   statement {
     sid       = "ReadStores"
     actions   = ["dynamodb:Scan", "dynamodb:GetItem"]
-    resources = [var.stores_table_arn]
+    resources = [aws_dynamodb_table.stores.arn]
   }
 }
 
@@ -98,8 +98,8 @@ resource "aws_lambda_function" "report_service" {
     variables = {
       STAGE          = var.stage_name
       ORDERS_TABLE   = aws_dynamodb_table.orders.name
-      PRODUCTS_TABLE = var.products_table_name
-      STORES_TABLE   = var.stores_table_name
+      PRODUCTS_TABLE = aws_dynamodb_table.products.name
+      STORES_TABLE   = aws_dynamodb_table.stores.name
     }
   }
 
@@ -114,27 +114,27 @@ resource "aws_lambda_function" "report_service" {
 # API Gateway - GET /reports/dashboard
 # ===========================================================================
 resource "aws_api_gateway_resource" "reports" {
-  rest_api_id = var.rest_api_id
-  parent_id   = var.rest_api_root_resource_id
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  parent_id   = aws_api_gateway_rest_api.main.root_resource_id
   path_part   = "reports"
 }
 
 resource "aws_api_gateway_resource" "reports_dashboard" {
-  rest_api_id = var.rest_api_id
+  rest_api_id = aws_api_gateway_rest_api.main.id
   parent_id   = aws_api_gateway_resource.reports.id
   path_part   = "dashboard"
 }
 
 resource "aws_api_gateway_method" "reports_dashboard_get" {
-  rest_api_id   = var.rest_api_id
+  rest_api_id   = aws_api_gateway_rest_api.main.id
   resource_id   = aws_api_gateway_resource.reports_dashboard.id
   http_method   = "GET"
   authorization = "CUSTOM"
-  authorizer_id = var.authorizer_id
+  authorizer_id = aws_api_gateway_authorizer.jwt.id
 }
 
 resource "aws_api_gateway_integration" "reports_dashboard_get" {
-  rest_api_id             = var.rest_api_id
+  rest_api_id             = aws_api_gateway_rest_api.main.id
   resource_id             = aws_api_gateway_resource.reports_dashboard.id
   http_method             = aws_api_gateway_method.reports_dashboard_get.http_method
   type                    = "AWS_PROXY"
@@ -143,14 +143,14 @@ resource "aws_api_gateway_integration" "reports_dashboard_get" {
 }
 
 resource "aws_api_gateway_method" "reports_dashboard_options" {
-  rest_api_id   = var.rest_api_id
+  rest_api_id   = aws_api_gateway_rest_api.main.id
   resource_id   = aws_api_gateway_resource.reports_dashboard.id
   http_method   = "OPTIONS"
   authorization = "NONE"
 }
 
 resource "aws_api_gateway_integration" "reports_dashboard_options" {
-  rest_api_id = var.rest_api_id
+  rest_api_id = aws_api_gateway_rest_api.main.id
   resource_id = aws_api_gateway_resource.reports_dashboard.id
   http_method = aws_api_gateway_method.reports_dashboard_options.http_method
   type        = "MOCK"
@@ -161,7 +161,7 @@ resource "aws_api_gateway_integration" "reports_dashboard_options" {
 }
 
 resource "aws_api_gateway_method_response" "reports_dashboard_options" {
-  rest_api_id = var.rest_api_id
+  rest_api_id = aws_api_gateway_rest_api.main.id
   resource_id = aws_api_gateway_resource.reports_dashboard.id
   http_method = aws_api_gateway_method.reports_dashboard_options.http_method
   status_code = "200"
@@ -174,7 +174,7 @@ resource "aws_api_gateway_method_response" "reports_dashboard_options" {
 }
 
 resource "aws_api_gateway_integration_response" "reports_dashboard_options" {
-  rest_api_id = var.rest_api_id
+  rest_api_id = aws_api_gateway_rest_api.main.id
   resource_id = aws_api_gateway_resource.reports_dashboard.id
   http_method = aws_api_gateway_method.reports_dashboard_options.http_method
   status_code = aws_api_gateway_method_response.reports_dashboard_options.status_code
@@ -193,54 +193,30 @@ resource "aws_lambda_permission" "apigw_report_service" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.report_service.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "${var.rest_api_execution_arn}/*/GET/reports/dashboard"
+  source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
 }
 
-# Activa métricas detalladas en todos los métodos del stage compartido.
+# Activa métricas detalladas en el stage unificado.
 resource "aws_api_gateway_method_settings" "cloudwatch_metrics" {
   count       = var.enable_api_gateway_method_metrics ? 1 : 0
-  rest_api_id = var.rest_api_id
-  stage_name  = var.stage_name
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  stage_name  = aws_api_gateway_stage.main.stage_name
   method_path = "*/*"
 
   settings {
     metrics_enabled = true
   }
-}
 
-# Deployment independiente del módulo. El stage final puede ser administrado por
-# el main.tf integrador de la persona 6.
-resource "aws_api_gateway_deployment" "reports" {
-  rest_api_id = var.rest_api_id
-
-  triggers = {
-    redeploy = sha1(jsonencode([
-      aws_api_gateway_resource.reports.id,
-      aws_api_gateway_resource.reports_dashboard.id,
-      aws_api_gateway_method.reports_dashboard_get.id,
-      aws_api_gateway_integration.reports_dashboard_get.id,
-      aws_api_gateway_integration.reports_dashboard_options.id,
-    ]))
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
-
-  depends_on = [
-    aws_api_gateway_integration.reports_dashboard_get,
-    aws_api_gateway_integration.reports_dashboard_options,
-  ]
+  depends_on = [aws_api_gateway_stage.main]
 }
 
 # ===========================================================================
 # CloudWatch - métricas, filtros, alarmas y dashboard (Caso de prueba 3)
 # ===========================================================================
 resource "aws_cloudwatch_log_metric_filter" "authorizer_errors" {
-  count          = var.authorizer_log_group_name == "" ? 0 : 1
   name           = "${local.name_prefix}-authentication-errors"
   pattern        = "\"Authorizer deny/unauthorized\""
-  log_group_name = var.authorizer_log_group_name
+  log_group_name = aws_cloudwatch_log_group.authorizer.name
 
   metric_transformation {
     name      = "AuthenticationErrors"
@@ -297,7 +273,7 @@ resource "aws_cloudwatch_metric_alarm" "api_gateway_5xx" {
   treat_missing_data  = "notBreaching"
 
   dimensions = {
-    ApiName = var.api_gateway_name
+    ApiName = aws_api_gateway_rest_api.main.name
     Stage   = var.stage_name
   }
 }
@@ -314,7 +290,7 @@ resource "aws_cloudwatch_dashboard" "cloudshop_monitoring" {
         width  = 24
         height = 2
         properties = {
-          markdown = "# CloudShop Enterprise — Monitoreo\nMétricas de Report Service, Lambda, API Gateway y seguridad."
+          markdown = "# CloudShop Enterprise — Monitoreo\nMétricas de Report Service, Lambda, API Gateway, EventBridge y seguridad."
         }
       },
       {
@@ -400,18 +376,36 @@ resource "aws_cloudwatch_dashboard" "cloudshop_monitoring" {
           view   = "timeSeries"
           period = 300
           metrics = [
-            ["AWS/ApiGateway", "Count", "ApiName", var.api_gateway_name, "Stage", var.stage_name, { stat = "Sum" }],
-            ["AWS/ApiGateway", "Latency", "ApiName", var.api_gateway_name, "Stage", var.stage_name, { stat = "Average", yAxis = "right" }],
-            ["AWS/ApiGateway", "4XXError", "ApiName", var.api_gateway_name, "Stage", var.stage_name, { stat = "Sum" }],
-            ["AWS/ApiGateway", "5XXError", "ApiName", var.api_gateway_name, "Stage", var.stage_name, { stat = "Sum" }]
+            ["AWS/ApiGateway", "Count", "ApiName", aws_api_gateway_rest_api.main.name, "Stage", var.stage_name, { stat = "Sum" }],
+            ["AWS/ApiGateway", "Latency", "ApiName", aws_api_gateway_rest_api.main.name, "Stage", var.stage_name, { stat = "Average", yAxis = "right" }],
+            ["AWS/ApiGateway", "4XXError", "ApiName", aws_api_gateway_rest_api.main.name, "Stage", var.stage_name, { stat = "Sum" }],
+            ["AWS/ApiGateway", "5XXError", "ApiName", aws_api_gateway_rest_api.main.name, "Stage", var.stage_name, { stat = "Sum" }]
+          ]
+        }
+      },
+      {
+        type   = "metric"
+        x      = 0
+        y      = 14
+        width  = 12
+        height = 6
+        properties = {
+          title  = "EventBridge OrderCreated"
+          region = var.aws_region
+          view   = "timeSeries"
+          period = 300
+          metrics = [
+            ["AWS/Events", "TriggeredRules", "RuleName", aws_cloudwatch_event_rule.order_created.name],
+            [".", "Invocations", "RuleName", aws_cloudwatch_event_rule.order_created.name],
+            [".", "FailedInvocations", "RuleName", aws_cloudwatch_event_rule.order_created.name],
           ]
         }
       },
       {
         type   = "log"
-        x      = 0
+        x      = 12
         y      = 14
-        width  = 24
+        width  = 12
         height = 6
         properties = {
           title  = "Logs recientes de Report Service"

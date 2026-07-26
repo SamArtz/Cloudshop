@@ -73,21 +73,19 @@ métricas de la regla EventBridge, entradas en la tabla de auditoría y correo S
 
 ## Despliegue (Terraform)
 
-```bash
+El módulo de pedidos forma parte del **stack unificado**. Ver
+[EVENTOS-AUDITORIA-TERRAFORM.md](EVENTOS-AUDITORIA-TERRAFORM.md) (Caso 4):
+
+```powershell
+python scripts/stage_lambda.py all
 cd terraform
-cp terraform.tfvars.example terraform.tfvars   # completar con IDs reales
+copy terraform.tfvars.example terraform.tfvars
 terraform init
 terraform apply
 ```
 
-Requiere como entrada los recursos del stack compartido (API Gateway,
-authorizer, tablas de productos y auditoría) — ver `variables.tf`.
-
-> **Nota API Gateway:** este módulo agrega las rutas `/cart` y `/orders` al REST
-> API compartido y crea un `aws_api_gateway_deployment`. Si el stage (`dev`) lo
-> administra el stack compartido, vuelve a desplegarlo para activar las rutas:
-> `aws apigateway create-deployment --rest-api-id <id> --stage-name dev`.
-
+Ya no se requieren IDs externos de API/tablas: Auth, Catalog, Orders, EventBridge,
+SES, auditoría y frontend se crean juntos.
 ## Seguridad (mínimo privilegio)
 - El rol del Order Service solo puede: R/W carritos y pedidos, **leer y ajustar
   stock** de productos (no crear/borrar), escribir auditoría y publicar eventos.

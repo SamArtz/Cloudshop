@@ -1,6 +1,4 @@
-# CloudShop Enterprise - Módulo Carrito & Pedidos (Órdenes)
-# Nota: si el stack compartido del equipo ya define el provider/terraform block,
-# elimina este archivo y reutiliza el del stack raíz.
+# CloudShop Enterprise — Providers (stack unificado)
 
 terraform {
   required_version = ">= 1.5.0"
@@ -18,6 +16,10 @@ terraform {
       source  = "hashicorp/null"
       version = ">= 3.2"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = ">= 3.5"
+    }
   }
 }
 
@@ -27,8 +29,22 @@ provider "aws" {
   default_tags {
     tags = {
       Project = "CloudShop"
-      Module  = "Orders"
       IaC     = "Terraform"
+      Stage   = var.stage_name
+    }
+  }
+}
+
+# WAF asociado a CloudFront debe vivir en us-east-1
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
+
+  default_tags {
+    tags = {
+      Project = "CloudShop"
+      IaC     = "Terraform"
+      Stage   = var.stage_name
     }
   }
 }
