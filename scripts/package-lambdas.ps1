@@ -128,6 +128,29 @@ if (Test-Path $NotifZip) { Remove-Item $NotifZip -Force }
 Compress-Archive -Path (Join-Path $NotifBuild "*") -DestinationPath $NotifZip -Force
 Write-Host "OK: $NotifZip"
 
+# ---------- Report Service (Dashboard & Monitoreo) ----------
+$ReportBuild = Join-Path $Build "report_service"
+New-Item -ItemType Directory -Force -Path $ReportBuild | Out-Null
+
+$ReportReq = Join-Path $ReportBuild "requirements.pkg.txt"
+@"
+boto3>=1.34.0
+"@ | Set-Content $ReportReq -Encoding utf8
+
+Write-Host "==> Instalando deps Report Service (manylinux)..."
+Install-Deps -ReqFile $ReportReq -TargetDir $ReportBuild
+
+Copy-Item (Join-Path $Root "src\report_service\handler.py")      $ReportBuild -Force
+Copy-Item (Join-Path $Root "src\report_service\repository.py")   $ReportBuild -Force
+Copy-Item (Join-Path $Root "src\report_service\analytics.py")    $ReportBuild -Force
+Copy-Item (Join-Path $Root "src\report_service\permissions.py")  $ReportBuild -Force
+Copy-Item -Recurse (Join-Path $Root "src\shared") (Join-Path $ReportBuild "shared") -Force
+
+$ReportZip = Join-Path $Out "report_service.zip"
+if (Test-Path $ReportZip) { Remove-Item $ReportZip -Force }
+Compress-Archive -Path (Join-Path $ReportBuild "*") -DestinationPath $ReportZip -Force
+Write-Host "OK: $ReportZip"
+
 Write-Host ""
 Write-Host "Listo. Zips en: $Out"
 Get-ChildItem $Out

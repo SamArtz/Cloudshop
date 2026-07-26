@@ -79,3 +79,40 @@ variable "log_retention_days" {
   type        = number
   default     = 14
 }
+
+# ---------------------------------------------------------------------------
+# Report Service y CloudWatch (Módulo 6)
+# ---------------------------------------------------------------------------
+variable "stores_table_name" {
+  description = "Nombre de la tabla DynamoDB de tiendas (creada por catalog)"
+  type        = string
+}
+
+variable "stores_table_arn" {
+  description = "ARN de la tabla DynamoDB de tiendas"
+  type        = string
+}
+
+variable "api_gateway_name" {
+  description = "Nombre del REST API; se usa como dimensión de CloudWatch"
+  type        = string
+  default     = "cloudshop-api"
+}
+
+variable "authorizer_log_group_name" {
+  description = "Log group de la Lambda Authorizer para contar errores de autenticación; vacío desactiva el filtro"
+  type        = string
+  default     = ""
+}
+
+variable "enable_api_gateway_method_metrics" {
+  description = "Activa métricas detalladas de métodos en el stage compartido de API Gateway"
+  type        = bool
+  default     = true
+}
+
+variable "report_latency_alarm_ms" {
+  description = "Umbral de alarma para la latencia promedio del dashboard, en milisegundos"
+  type        = number
+  default     = 3000
+}

@@ -32,3 +32,23 @@ output "api_deployment_id" {
   description = "ID del deployment de API Gateway (redesplegar el stage compartido si es necesario)"
   value       = aws_api_gateway_deployment.orders.id
 }
+
+output "report_service_function_name" {
+  description = "Nombre de la Lambda Report Service"
+  value       = aws_lambda_function.report_service.function_name
+}
+
+output "cloudwatch_dashboard_name" {
+  description = "Dashboard de CloudWatch para el Caso de prueba 3"
+  value       = aws_cloudwatch_dashboard.cloudshop_monitoring.dashboard_name
+}
+
+output "reports_api_deployment_id" {
+  description = "Deployment de API Gateway que incluye GET /reports/dashboard"
+  value       = aws_api_gateway_deployment.reports.id
+}
+
+output "reports_endpoint_path" {
+  description = "Ruta del dashboard ejecutivo"
+  value       = "/${var.stage_name}/reports/dashboard"
+}
