@@ -64,8 +64,8 @@ output "ses_sender_email" {
 }
 
 output "cloudwatch_dashboard" {
-  description = "Nombre del dashboard de CloudWatch"
-  value       = aws_cloudwatch_dashboard.cloudshop.dashboard_name
+  description = "Nombre del dashboard de CloudWatch (Caso 3)"
+  value       = aws_cloudwatch_dashboard.cloudshop_monitoring.dashboard_name
 }
 
 output "lambda_functions" {
@@ -76,5 +76,16 @@ output "lambda_functions" {
     catalog       = aws_lambda_function.catalog_service.function_name
     orders        = aws_lambda_function.order_service.function_name
     notifications = aws_lambda_function.notifications.function_name
+    reports       = aws_lambda_function.report_service.function_name
   }
+}
+
+output "report_service_function_name" {
+  description = "Nombre de la Lambda Report Service"
+  value       = aws_lambda_function.report_service.function_name
+}
+
+output "reports_endpoint_path" {
+  description = "Ruta del dashboard ejecutivo"
+  value       = "/${var.stage_name}/reports/dashboard"
 }

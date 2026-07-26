@@ -9,6 +9,7 @@ Plataforma de comercio electrónico cloud-native (AWS + Terraform).
 | Auth & seguridad | Auth Service, Lambda Authorizer JWT, IAM |
 | Catálogo | Productos y tiendas |
 | Carrito & pedidos | Order Service + EventBridge + SES |
+| Dashboard | Report Service + CloudWatch (Caso 3) |
 | Auditoría | DynamoDB `audit-logs` |
 | Frontend | S3 + CloudFront + WAF |
 | IaC | Stack Terraform unificado (`terraform/main.tf`) |
@@ -34,7 +35,14 @@ terraform apply
 ## Documentación por módulo
 
 - [Carrito & Pedidos / Caso 2](docs/MODULO-CARRITO-PEDIDOS.md)
+- [Dashboard & Monitoreo / Caso 3](docs/MODULO-DASHBOARD-MONITOREO.md)
 - [Eventos, Auditoría & Terraform / Caso 4](docs/EVENTOS-AUDITORIA-TERRAFORM.md)
+
+## Módulo 6 — Dashboard & Monitoreo
+
+- `src/report_service`: Lambda Python del dashboard ejecutivo.
+- `terraform/reports.tf`: API, IAM, CloudWatch dashboard, alarmas y métricas.
+- Endpoint: `GET /reports/dashboard` (solo rol `ADMIN`).
 
 ## Estructura
 
@@ -44,6 +52,7 @@ src/
   authorizer/        # JWT authorizer
   catalog_service/   # Productos y tiendas
   order_service/     # Carrito y pedidos
+  report_service/    # Dashboard ejecutivo
   notifications/     # EventBridge → SES + auditoría
   shared/
 frontend/            # Estáticos (S3/CloudFront)

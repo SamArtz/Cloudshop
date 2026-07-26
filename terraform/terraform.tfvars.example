@@ -12,6 +12,10 @@ ses_verify_sender = true
 jwt_expiration_hours = 24
 log_retention_days   = 14
 
-upload_frontend     = true
-waf_rate_limit      = 2000
+upload_frontend      = true
+waf_rate_limit       = 2000
 enable_event_archive = true
+
+# --- Report Service / CloudWatch (Módulo 6 / Caso 3) ---
+report_latency_alarm_ms           = 3000
+enable_api_gateway_method_metrics = true

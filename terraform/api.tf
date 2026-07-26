@@ -50,6 +50,9 @@ resource "aws_api_gateway_deployment" "main" {
       # Orders
       aws_api_gateway_integration.orders_any,
       aws_api_gateway_integration.orders_options,
+      # Reports
+      aws_api_gateway_integration.reports_dashboard_get,
+      aws_api_gateway_integration.reports_dashboard_options,
     ]))
   }
 
@@ -68,6 +71,8 @@ resource "aws_api_gateway_deployment" "main" {
     aws_api_gateway_integration.catalog_options,
     aws_api_gateway_integration.orders_any,
     aws_api_gateway_integration.orders_options,
+    aws_api_gateway_integration.reports_dashboard_get,
+    aws_api_gateway_integration.reports_dashboard_options,
   ]
 }
 

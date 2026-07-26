@@ -47,6 +47,12 @@ SERVICES: dict[str, dict] = {
         "shared": False,
         "reqs": [],
     },
+    "report_service": {
+        "src": ROOT / "src" / "report_service",
+        "files": ["handler.py", "permissions.py", "repository.py", "analytics.py"],
+        "shared": True,
+        "reqs": [],
+    },
 }
 
 

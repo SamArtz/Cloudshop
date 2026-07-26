@@ -56,3 +56,18 @@ variable "enable_event_archive" {
   type        = bool
   default     = true
 }
+
+# ---------------------------------------------------------------------------
+# Report Service y CloudWatch (Módulo 6)
+# ---------------------------------------------------------------------------
+variable "enable_api_gateway_method_metrics" {
+  description = "Activa métricas detalladas de métodos en el stage de API Gateway"
+  type        = bool
+  default     = true
+}
+
+variable "report_latency_alarm_ms" {
+  description = "Umbral de alarma para la latencia promedio del dashboard, en milisegundos"
+  type        = number
+  default     = 3000
+}
